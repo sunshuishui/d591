@@ -1,0 +1,210 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>客资管理</title>
+<load href="__PUBLIC__/js/jquery-1.11.0.min.js" />
+<load href="__PUBLIC__/css/datastyle.css" />
+<script>
+	function DateSize($date1,$date2){
+		$s= new Date($date1); 
+		$d= new Date($date2); 
+		if($s>$d){
+			return false;
+		}else{
+			return true;
+		}	
+	}
+	function checktime(){
+		if($('#starttime').val()!='' && $('#endtime').val()==''){
+			alert('请选择结束日期');
+			return false;
+		}
+		if($('#endtime').val()!='' && $('#starttime').val()==''){
+			alert('请选择开始日期');
+			return false;
+		}
+		if(!DateSize($('#starttime').val(),$('#endtime').val())){
+			alert('结束日期不能小于开始日期！');
+			return false;	
+		}
+		return true;
+	}
+	function ExportData(){
+		if(checktime()){
+			if($('#starttime').val()=='' && $('#endtime').val()==''){
+				alert('请选择日期');
+				return false;
+			}else{
+				location.href='__URL__/exportdata/starttime/'+$('#starttime').val()+'/endtime/'+$('#endtime').val();
+			}
+		}
+	}
+</script>
+</head>
+<body>
+<div class="mainAll">
+<div class="addmedia">
+    <form method="post" action="" onsubmit="return checktime();" style="float:left">
+    <span class="m30">起始日期：</span><input type="date"  class="w120" name="starttime" id="starttime" value="<{$starttime}>"/>-&nbsp;&nbsp;&nbsp;&nbsp;<input type="date"  class="w120" name="endtime" id="endtime" value="<{$endtime}>"/><input type="submit" value="查询" class="addbtn" />
+    </form>
+    <form method="post" action="" style="float:left; margin:0 25px;margin-top: 2px;">
+    <input type="hidden"  name="starttime" value="<php>echo date('Y-m-d');</php>"/><input type="hidden"  name="endtime" value="<php>echo date('Y-m-d');</php>"/>
+    <input type="submit" value="今天" class="addbtn" />
+    </form>
+    <form method="post" action="" style="margin-top:2px">
+    <input type="hidden"  name="starttime" value="<php>echo date('Y-m-d',strtotime('-1 day'));</php>"/><input type="hidden"  name="endtime" value="<php>echo date('Y-m-d',strtotime('-1 day'));</php>"/>
+    <input type="submit" value="昨天" class="addbtn" />
+    </form>
+    
+</div>
+<if condition="$act eq 1">
+<table cellpadding="0" cellspacing="0" width="100%">
+    <tr class="bb_table">
+   	 	<th height="50" class="bb_table" align="center"></th>
+        <th height="50" class="bb_table" align="center">数据量</th>
+    	<volist name='states' id='state'>
+        <th height="50" class="bb_table" align="center"><{$state}></th>
+        </volist>
+        <volist name='valids' id='valid'>
+        <th height="50" class="bb_table" align="center"><{$valid}></th>
+        </volist>
+    </tr>
+    <volist name='askarr' id='ask'>
+    <php>$askid=$key;</php>
+    <tr class="bb_table" onmouseover="this.style.background='#e9f2ed'" onmouseout="this.style.background='#ffffff'">
+     	<td class="bb_table" height="50" align="center" width="200"><b><{$ask}></b></td>
+        <td class="bb_table" height="50" align="center"><if condition="$CountZong[$askid] neq null"><{$CountZong[$askid]}><else/>-</if></td>
+        <volist name='states' id='state'>
+        <td class="bb_table" height="50" align="center"><if condition="$CountState[$askid][$key] neq null"><{$CountState[$askid][$key]}><else/>-</if></td>
+        </volist>
+        <volist name='valids' id='valid'>
+        <td class="bb_table" height="50" align="center"><if condition="$CountValid[$askid][$key] neq null"><{$CountValid[$askid][$key]}><else/>-</if></td>
+        </volist>
+    </tr>
+    </volist>
+    <tr class="bb_table" onmouseover="this.style.background='#e9f2ed'" onmouseout="this.style.background='#ffffff'">
+     	<td class="bb_table" height="50" align="center"><b>总计</b></td>
+        <td class="bb_table" height="50" align="center"><if condition="$CountData neq null"><{$CountData}><else/>-</if></td>
+        <volist name='states' id='state'>
+        <td class="bb_table" height="50" align="center"><if condition="$CountAllState[$key] neq null"><{$CountAllState[$key]}><else/>-</if></td>
+        </volist>
+        <volist name='valids' id='valid'>
+        <td class="bb_table" height="50" align="center"><if condition="$CountAllValid[$key] neq null"><{$CountAllValid[$key]}><else/>-</if></td>
+        </volist>        
+    </tr>
+</table>
+<elseif condition="$act eq 2" />
+<table cellpadding="0" cellspacing="0" width="100%">
+    <tr class="bb_table">
+   	 	<th height="50" class="bb_table" align="center"></th>
+        <th height="50" class="bb_table" align="center">数据量</th>
+    	<volist name='states' id='state'>
+        <th height="50" class="bb_table" align="center"><{$state}></th>
+        </volist>
+        <volist name='valids' id='valid'>
+        <th height="50" class="bb_table" align="center"><{$valid}></th>
+        </volist>
+    </tr>
+    <volist name='cusarr' id='ask'>
+    <php>$askid=$key;</php>
+    <tr class="bb_table" onmouseover="this.style.background='#e9f2ed'" onmouseout="this.style.background='#ffffff'">
+     	<td class="bb_table" height="50" align="center" width="200"><b><{$ask}></b></td>
+        <td class="bb_table" height="50" align="center"><if condition="$CountZong[$askid] neq null"><{$CountZong[$askid]}><else/>-</if></td>
+        <volist name='states' id='state'>
+        <td class="bb_table" height="50" align="center"><if condition="$CountState[$askid][$key] neq null"><{$CountState[$askid][$key]}><else/>-</if></td>
+        </volist>
+        <volist name='valids' id='valid'>
+        <td class="bb_table" height="50" align="center"><if condition="$CountValid[$askid][$key] neq null"><{$CountValid[$askid][$key]}><else/>-</if></td>
+        </volist>
+    </tr>
+    </volist>
+    <tr class="bb_table" onmouseover="this.style.background='#e9f2ed'" onmouseout="this.style.background='#ffffff'">
+     	<td class="bb_table" height="50" align="center"><b>总计</b></td>
+        <td class="bb_table" height="50" align="center"><if condition="$CountData neq null"><{$CountData}><else/>-</if></td>
+        <volist name='states' id='state'>
+        <td class="bb_table" height="50" align="center"><if condition="$CountAllState[$key] neq null"><{$CountAllState[$key]}><else/>-</if></td>
+        </volist>
+        <volist name='valids' id='valid'>
+        <td class="bb_table" height="50" align="center"><if condition="$CountAllValid[$key] neq null"><{$CountAllValid[$key]}><else/>-</if></td>
+        </volist>        
+    </tr>
+</table>
+<elseif condition="$act eq 3" />
+<table cellpadding="0" cellspacing="0" width="100%">
+    <tr class="bb_table">
+   	 	<th height="50" class="bb_table" align="center"></th>
+        <th height="50" class="bb_table" align="center">数据量</th>
+    	<volist name='states' id='state'>
+        <th height="50" class="bb_table" align="center"><{$state}></th>
+        </volist>
+        <volist name='valids' id='valid'>
+        <th height="50" class="bb_table" align="center"><{$valid}></th>
+        </volist>
+    </tr>
+    <volist name='salearr' id='ask'>
+    <php>$askid=$key;</php>
+    <tr class="bb_table" onmouseover="this.style.background='#e9f2ed'" onmouseout="this.style.background='#ffffff'">
+     	<td class="bb_table" height="50" align="center" width="200"><b><{$cusarr[$saletocarr[$askid]]|default='其他'}>—<{$ask}></b></td>
+        <td class="bb_table" height="50" align="center"><if condition="$CountZong[$askid] neq null"><{$CountZong[$askid]}><else/>-</if></td>
+        <volist name='states' id='state'>
+        <td class="bb_table" height="50" align="center"><if condition="$CountState[$askid][$key] neq null"><{$CountState[$askid][$key]}><else/>-</if></td>
+        </volist>
+        <volist name='valids' id='valid'>
+        <td class="bb_table" height="50" align="center"><if condition="$CountValid[$askid][$key] neq null"><{$CountValid[$askid][$key]}><else/>-</if></td>
+        </volist>
+    </tr>
+    </volist>
+    <tr class="bb_table" onmouseover="this.style.background='#e9f2ed'" onmouseout="this.style.background='#ffffff'">
+     	<td class="bb_table" height="50" align="center"><b>总计</b></td>
+        <td class="bb_table" height="50" align="center"><if condition="$CountData neq null"><{$CountData}><else/>-</if></td>
+        <volist name='states' id='state'>
+        <td class="bb_table" height="50" align="center"><if condition="$CountAllState[$key] neq null"><{$CountAllState[$key]}><else/>-</if></td>
+        </volist>
+        <volist name='valids' id='valid'>
+        <td class="bb_table" height="50" align="center"><if condition="$CountAllValid[$key] neq null"><{$CountAllValid[$key]}><else/>-</if></td>
+        </volist>        
+    </tr>
+</table>
+
+<elseif condition="$act eq 4" />
+<table cellpadding="0" cellspacing="0" width="100%">
+    <tr class="bb_table">
+   	 	<th height="50" class="bb_table" align="center"></th>
+        <th height="50" class="bb_table" align="center">数据量</th>
+    	<volist name='states' id='state'>
+        <th height="50" class="bb_table" align="center"><{$state}></th>
+        </volist>
+        <volist name='valids' id='valid'>
+        <th height="50" class="bb_table" align="center"><{$valid}></th>
+        </volist>
+    </tr>
+    <volist name='medialist' id='ask'>
+    <php>$askid=$key;</php>
+    <tr class="bb_table" onmouseover="this.style.background='#e9f2ed'" onmouseout="this.style.background='#ffffff'">
+     	<td class="bb_table" height="50" align="center" width="200"><b><{$ask}></b></td>
+        <td class="bb_table" height="50" align="center"><if condition="$CountZong[$askid] neq null"><{$CountZong[$askid]}><else/>-</if></td>
+        <volist name='states' id='state'>
+        <td class="bb_table" height="50" align="center"><if condition="$CountState[$askid][$key] neq null"><{$CountState[$askid][$key]}><else/>-</if></td>
+        </volist>
+        <volist name='valids' id='valid'>
+        <td class="bb_table" height="50" align="center"><if condition="$CountValid[$askid][$key] neq null"><{$CountValid[$askid][$key]}><else/>-</if></td>
+        </volist>
+    </tr>
+    </volist>
+    <tr class="bb_table" onmouseover="this.style.background='#e9f2ed'" onmouseout="this.style.background='#ffffff'">
+     	<td class="bb_table" height="50" align="center"><b>总计</b></td>
+        <td class="bb_table" height="50" align="center"><if condition="$CountData neq null"><{$CountData}><else/>-</if></td>
+        <volist name='states' id='state'>
+        <td class="bb_table" height="50" align="center"><if condition="$CountAllState[$key] neq null"><{$CountAllState[$key]}><else/>-</if></td>
+        </volist>
+        <volist name='valids' id='valid'>
+        <td class="bb_table" height="50" align="center"><if condition="$CountAllValid[$key] neq null"><{$CountAllValid[$key]}><else/>-</if></td>
+        </volist>        
+    </tr>
+</table>
+</if>
+<div class="padding60"></div>
+</div>
+</body>
+</html>

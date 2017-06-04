@@ -1,0 +1,31 @@
+[ 2017-05-23T16:14:52+08:00 ] 127.0.0.1 /Login/
+INFO: [ route_check ] --START--
+INFO: Run CheckRoute Behavior [ RunTime:0.000972s ]
+INFO: [ route_check ] --END-- [ RunTime:0.001110s ]
+INFO: [ app_begin ] --START--
+INFO: Run ReadHtmlCache Behavior [ RunTime:0.000760s ]
+INFO: [ app_begin ] --END-- [ RunTime:0.000884s ]
+INFO: [ view_template ] --START--
+INFO: Run LocationTemplate Behavior [ RunTime:0.001101s ]
+INFO: [ view_template ] --END-- [ RunTime:0.001279s ]
+INFO: [ view_parse ] --START--
+INFO: Run ParseTemplate Behavior [ RunTime:0.031387s ]
+INFO: [ view_parse ] --END-- [ RunTime:0.031546s ]
+INFO: [ view_filter ] --START--
+INFO: Run ContentReplace Behavior [ RunTime:0.000626s ]
+INFO: Run TokenBuild Behavior [ RunTime:0.000566s ]
+INFO: Run WriteHtmlCache Behavior [ RunTime:0.000400s ]
+INFO: Run ShowRuntime Behavior [ RunTime:0.000667s ]
+INFO: [ view_filter ] --END-- [ RunTime:0.002567s ]
+INFO: [ view_end ] --START--
+INFO: Run ShowPageTrace Behavior [ RunTime:0.000684s ]
+INFO: [ view_end ] --END-- [ RunTime:0.000794s ]
+
+[ 2017-05-23T16:14:52+08:00 ] 127.0.0.1 /index.php/Login/verify
+INFO: [ route_check ] --START--
+INFO: Run CheckRoute Behavior [ RunTime:0.000766s ]
+INFO: [ route_check ] --END-- [ RunTime:0.000899s ]
+INFO: [ app_begin ] --START--
+INFO: Run ReadHtmlCache Behavior [ RunTime:0.000603s ]
+INFO: [ app_begin ] --END-- [ RunTime:0.000720s ]
+

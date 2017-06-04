@@ -1,0 +1,476 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>客资管理</title>
+<load href="__PUBLIC__/js/jquery-1.11.0.min.js" />
+<load href="__PUBLIC__/js/clipboard.min.js" />
+<load href="__PUBLIC__/css/datastyle.css" />
+<script>
+	function DateSize($date1,$date2){
+		$s= new Date($date1); 
+		$d= new Date($date2); 
+		if($s>$d){
+			return false;
+		}else{
+			return true;
+		}	
+	}
+	function checkD(){
+		$bmobile=$('#bmobile').val();
+		$gmobile=$('#gmobile').val();
+		$wechat=$('#wechat').val();
+		$qq=$('#qq').val();
+		if(!$bmobile && !$gmobile && !$wechat && !$qq){
+			alert('请至少填写一种联系方式！');	
+			return false;
+		}
+		if($bmobile!=''){
+			if(! /^1[345678]\d{9}$/.test($bmobile)){
+				 $("#bmobile").focus();
+				 alert('请输入正确的男方号码！');
+				 return false;
+			}
+		}
+		if($gmobile!=''){
+			if(! /^1[345678]\d{9}$/.test($gmobile)){
+				 $("#gmobile").focus();
+				 alert('请输入正确的女方号码！');
+				 return false;
+			}
+		}
+		if($("#source").val()==0){
+			alert('请添加数据来源！');
+			return false;	
+		}
+		
+		if($("#askid").val()==''){
+			alert('请选择所属鼠标手！');
+			return false;	
+		}
+		
+		if($('#nexttime').val()){
+			$mydate=new Date();
+			$nowdate=new Date($mydate.toLocaleDateString());
+			if(!DateSize($nowdate,$('#nexttime').val())){
+				alert('待回访时间不能小于当前时间！');
+				return false;	
+			}
+		}
+		$onc=0;
+		$(".onc").each(function($i){
+			if($(".onc").eq($i).val()!=''){
+				$onc++;	
+				return false;
+			}
+		});
+		if($onc==0){
+			alert('请选择推荐商户！');
+			return false;	
+		}
+		$valid=$('#valid').val();
+		$state=$('#state').val();
+		if($state==1){
+			if($valid==3){
+				if($('#suretime').val()==''){
+					alert('请填写订单时间！');
+					return false;		
+				}
+			}	
+		}
+		if($("#pic").val()!='' && $("#note").val()==''){
+			alert('请填写跟踪记录！');
+			return false;	
+		}
+		return true;
+	}
+	function checkD2(){
+		if($("#source").val()==0){
+			alert('请添加数据来源！');
+			return false;	
+		}
+		if($("#askid").val()==''){
+			alert('请选择所属鼠标手！');
+			return false;	
+		}
+		
+		if($('#nexttime').val()){
+			$mydate=new Date();
+			$nowdate=new Date($mydate.toLocaleDateString());
+			if(!DateSize($nowdate,$('#nexttime').val())){
+				alert('待回访时间不能小于当前时间！');
+				return false;	
+			}
+		}
+		
+		$valid=$('#valid').val();
+		$state=$('#state').val();
+		if($state==1){
+			if($valid==2){
+				if($('#incustime').val()==''){
+					alert('请填写进店时间！');
+					return false;		
+				}
+			}
+			if($valid==3){
+				if($('#suretime').val()==''){
+					alert('请填写订单时间！');
+					return false;		
+				}
+			}	
+		}
+		if($("#pic").val()!='' && $("#note").val()==''){
+			alert('请填写跟踪记录！');
+			return false;	
+		}
+		return true;
+	}
+	
+	$(function(){
+		
+		//推荐商家的时候加背景颜色区分,并查询重复
+		$('.onc').change(function(){
+			if($(this).val()){
+				AjaxReturn($(this));
+				$(this).addClass('addbg');	
+			}else{
+				$(this).css('border','solid 1px #e8ecf3');
+				$(this).removeClass('addbg');		
+			}
+		})
+		
+		//客资有效时候，跳出有效状态
+		$('#state').change(function(){
+			
+			if($(this).val()==1){
+				$('#valid').show();	
+			}else{
+				$('#valid').hide();		
+			}
+		})
+	})
+	function AjaxReturn($this){
+		$bmobile=$('#bmobile').val();
+		$gmobile=$('#gmobile').val();
+		$wechat=$('#wechat').val();
+		$qq=$('#qq').val();
+		$id=$('#id').val();
+		$cusid=$this.val();
+		$isact=true;
+		if(!$bmobile && !$gmobile && !$wechat && !$qq){
+			alert('请至少填写一种联系方式！');	
+			$isact=false;
+		}
+		if(!$cusid){
+			$isact=false;
+		}
+		//$isact=false;
+		if($isact){
+			$.post('__URL__/checkrepeat',{bmobile:$bmobile,gmobile:$gmobile,wechat:$wechat,qq:$qq,cusid:$cusid,id:$id},function($msg){
+				if($msg['status']==1){
+					alert($msg['info']);
+				}else if($msg['status']==2){
+					$($this).css('border','solid 1px #ff0000');
+					alert('此商户数据重复');
+				}else{
+					$($this).css('border','solid 1px #e8ecf3');
+				}
+			})
+		}
+	}
+	function checktime(){
+		if($('#starttime').val()!='' && $('#endtime').val()==''){
+			alert('请选择结束日期');
+			return false;
+		}
+		if($('#endtime').val()!='' && $('#starttime').val()==''){
+			alert('请选择开始日期');
+			return false;
+		}
+		if(!DateSize($('#starttime').val(),$('#endtime').val())){
+			alert('结束日期不能小于开始日期！');
+			return false;	
+		}
+		return true;
+	}
+</script>
+<style>
+.jilu2 a{background-image:url(__PUBLIC__/images/ypicon.jpg); background-repeat:no-repeat; background-position:left center; padding:8px}
+</style>
+</head>
+
+<body>
+<div class="mainAll">
+<if condition="$act eq 1">
+<table cellpadding="0" cellspacing="0" cellspacing="0" width="100%">
+
+	<tr <if condition="$map['nt'] neq null">class="none"</if>>
+        <td class="bb_table" height="70" colspan="10">
+        <include file="search"/>
+        </td>
+    </tr>
+  
+    <tr class="bb_table">
+        <th height="50" class="bb_table" align="center" width="10%">ID</th>
+        <th class="bb_table" align="center" width="10%"><if condition="$map['nt'] eq 'y'">回访<else/>提交</if>时间</th>
+        <th class="bb_table" align="center" width="10%">渠道</th>
+        <th class="bb_table" align="center" width="10%">微信</th>
+        <th class="bb_table" align="center" width="10%">姓名</th>
+        <th class="bb_table" align="center" width="10%">电话</th>
+        <th class="bb_table" align="center" width="10%">状态</th>
+        <th class="bb_table" align="center" width="10%">所属网销</th>
+        <th class="bb_table" align="center" width="10%">进店时间</th>
+        <th class="bb_table" align="center" width="10%">详情</th>
+    </tr>
+    <volist name='data' id='vo' empty="$empty">
+    <tr class="bb_table" onmouseover="this.style.background='#e9f2ed'" onmouseout="this.style.background='#ffffff'">
+     	<td class="bb_table" height="50" align="center"><{$vo.id}></td>
+        <td class="bb_table" align="center"><if condition="$map['nt'] eq 'y'"><{:Hz($vo['nexttime'])}><else/><{$vo.addtime}></if></td>
+        <td class="bb_table" align="center"><{$medialist[$vo['source']]}></td>
+        <td class="bb_table" align="center"><{$vo['wechat']}></td>
+        <td class="bb_table" height="50" align="center"><{:Echodata($vo['bname'],$vo['bmobile'],$vo['gname'],$vo['gmobile'],1)}></td>
+        <td class="bb_table" align="center"><{:Echodata($vo['bname'],$vo['bmobile'],$vo['gname'],$vo['gmobile'],2)}></td>
+        <td class="bb_table" align="center"><{:Status($vo['state'],$vo['valid'])}></td>
+        <td class="bb_table" align="center"><{$cusarr[$vo['customers']]}>—<{$salearr[$vo['saleid']]}></td>
+        <td class="bb_table" align="center"><{$vo['incustime']}></td>
+        <td class="bb_table" align="center">
+        	<php>$map['id']=$vo['id']</php>
+        	<a href="<{:U('Member/editmember',$map)}>" class="editbtn">详情</a>
+        </td>
+    </tr>
+    </volist>
+    <php>$map['id']=''</php>
+    <tr><td colspan="9" height="60" align="center" class="pageclass"><{$show}><form method="get" action="<{:U('Member/index',$map)}>" style="display:inline; margin-left:30px"><input type="number" name="p" class="w40"/><input type="submit" value="跳转" /></form></td></tr>
+</table>
+<elseif condition="$act eq 2"/>
+<p style="height:20px"></p>
+<form action="__URL__/addmember" method="post" onsubmit="return checkD();" enctype="multipart/form-data">
+<table cellpadding="0" cellspacing="1" width="1000" align="center" bgcolor="#32c2cd">
+	<tr bgcolor="#e6fafc">
+    	<td height="60" colspan="4" align="center"><font size="+1">基础信息</font></td>
+    </tr>
+	<tr bgcolor="#ffffff">
+    	<td height="60" width="25%" align="right">姓名（男）：<input type="text" class="w120 mri" value="<{$data.bname}>" name="bname" id="bname" /></td>
+        <td width="25%" align="right">电话（男）：<input type="text" class="w120 mri" value="<{$data.bmobile}>" name="bmobile" id="bmobile" maxlength="11" placeholder="男方手机号" /></td>
+        <td width="25%" align="right">姓名（女）：<input type="text" class="w120 mri" value="<{$data.gname}>" name="gname" id="gname" /></td>
+        <td width="25%" align="right">电话（女）：<input type="text" class="w120 mri" value="<{$data.gmobile}>" name="gmobile" id="gmobile" maxlength="11" placeholder="女方手机号" /></td>
+    </tr>
+    <tr bgcolor="#ffffff">
+        <td align="right">
+        微信：<input type="text" class="w120 mri" value="<{$data.wechat}>" name="wechat" id="wechat"/>
+        </td>
+        <td align="right">
+        QQ：<input type="text" class="w120 mri" value="<{$data.qq}>" name="qq" id="qq"/>
+        </td>
+        <td height="60" align="right">预算：<input type="number" class="w120 mri"  value="<{$data.budget}>" name="budget" id="budget"/></td>
+        <td height="60" align="right">婚期：<input type="date" class="w120 mri" name="marrydate" id="marrydate" /></td>
+        </tr>
+   
+    <tr bgcolor="#ffffff">
+    	<td height="60" align="right">数据来源：
+        <select class="w2_120 mri" name="source" id="source">
+        <option value="0">-----请选择-----</option>
+        <volist name='medialist' id='media'>
+        <option value="<{$key}>"><{$media}></option>
+        </volist>
+        </select>
+        </td>
+    	<td height="60" align="left" colspan="3">
+        <span class="m30">顾客需求：</span>
+        <volist name='needs' id='need'>
+        <input type="checkbox" value="<{$key}>" id='need<{$key}>' name='needs[]'/><label class="m15" for='need<{$key}>'><{$need}></label>
+        </volist>
+        </td>
+    </tr>
+    <tr bgcolor="#ffffff">
+    	<td colspan="4">
+        	<table cellpadding="0" cellspacing="0" width="100%">
+            	<tr>
+                	<td width="95" align="right"><span>推荐客户：</span></td>
+                    <td style="padding:15px 0">
+                    	<volist name='customers' id='customer'>
+                            <p class="pli">
+                            <select class="w2_170 onc" name="cus_sale[]">
+                                <option value="">----<{$customer.customername}>----</option>
+                                <volist name="salelist[$customer['id']]" id="sale">
+                                	<option value="<{$customer['id']}>-<{$sale.id}>"><{$sale.username}> (<{$customer.customername}>)</option>
+                                </volist>
+                            </select>
+                            </p>
+                        </volist>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr bgcolor="#e6fafc">
+    	<td height="60" colspan="4" align="center"><font size="+1">数据详情</font></td>
+    </tr>
+    <tr bgcolor="#ffffff">
+     	<td align="right">所属鼠标手：
+        <if condition="$power eq 1 or $power eq 2">
+        <select class="w2_120 mri" name="askid" id="askid">
+        <option value="">----请选择----</option>
+        <volist name='ask' id='ser'>
+        <option value="<{$key}>"><{$ser}></option>
+        </volist>
+        </select>
+        <else/>
+        <input type="hidden" value="<{$userid}>" name='askid' id="askid" />
+        <span class="mri"><{$ask[$userid]}></span>
+        </if>
+        </td>
+    	<td height="60" align="right">状态：
+        <select class="styleselect" name="state" id="state">
+        <volist name='states' id='state'>
+        <option value="<{$key}>"><{$state}></option>
+        </volist>
+        </select>
+        <select class="styleselect none" name="valid" id="valid">
+        <volist name='valids' id='valid'>
+        <option value="<{$key}>"><{$valid}></option>
+        </volist>
+        </select>
+        </td>
+        <td align="right">下次回访：<input type="date" class="w120 mri"  value="<{$data.nexttime}>" name="nexttime" id="nexttime"/></td>
+       <td align="right">签单时间：<input type="date" class="w120 mri"  value="<{$data.suretime}>" name="suretime" id="suretime"/></td>
+    </tr>
+    <tr bgcolor="#e6fafc">
+    	<td height="60" colspan="4" align="center"><font size="+1">跟进记录</font></td>
+    </tr>
+    <tr bgcolor="#ffffff">
+    	<td colspan="4" height="80">
+        	<p style="height:20px"></p>
+            <textarea class="textb90_2" name="note" id="note" placeholder="跟进记录"></textarea>
+            <p style="height:10px"></p>
+            <p class="m30"><input type="file" name="pic" id="pic" /></p>
+            <p style="height:10px"></p>
+        </td>
+    </tr>
+    <tr bgcolor="#ffffff">
+        <td colspan="4" align="center" height="60">
+        	<input type="hidden" value="<{$data.id}>" name="id" /><input type="submit" value="提交" class="addbtn" /><a href="javascript:history.back()" class="editbtn m30" onclick="return confirm('确定返回上一页吗？')">返回</a>
+        </td>
+    </tr>
+</table>
+</form>
+<elseif condition="$act eq 3"/>
+<p style="height:20px"></p>
+<form action="__URL__/savemember" method="post" onsubmit="return checkD2();" enctype="multipart/form-data">
+<table cellpadding="0" cellspacing="1" width="1000" align="center" bgcolor="#32c2cd">
+	<tr bgcolor="#e6fafc">
+    	<td height="60" colspan="4" align="center"><font size="+1">基础信息</font></td>
+    </tr>
+	<tr bgcolor="#ffffff">
+    	<td height="60" width="25%" align="right">姓名（男）：<input type="text" class="w120 mri" value="<{$data.bname}>" name="bname" id="bname" /></td>
+        <td width="25%" align="right">电话（男）：<if condition="$data.bmobile neq null"><span class="mri"><{$data.bmobile|sjiemi}></span><else/><span class="mri">无</span></if></td>
+        <td width="25%" align="right">姓名（女）：<input type="text" class="w120 mri" value="<{$data.gname}>" name="gname" id="gname" /></td>
+        <td width="25%" align="right">电话（女）：<if condition="$data.gmobile neq null"><span class="mri"><{$data.gmobile|sjiemi}></span><else/><span class="mri">无</span></if></td>
+    </tr>
+    <tr bgcolor="#ffffff">
+        <td align="right">
+        微信：<if condition="$data.wechat neq null"><span class="mri"><{$data.wechat}></span><else/><span class="mri">无</span></if>
+        </td>
+        <td align="right">
+        QQ：<if condition="$data.qq neq null"><span class="mri"><{$data.qq}></span><else/><span class="mri">无</span></if>
+        </td>
+        <td height="60" align="right">预算：<input type="number" class="w120 mri"  value="<{$data.budget}>" name="budget" id="budget"/></td>
+        <td height="60" align="right">婚期：<input type="date" class="w120 mri"  value="<{$data.marrydate}>" name="marrydate" id="marrydate" /></td>
+        </tr>
+   
+    <tr bgcolor="#ffffff">
+    	<td height="60" align="right">数据来源：
+        <if condition="$power eq 1 or $power eq 2">
+        <select class="w2_120 mri" name="source" id="source">
+        <option value="0">-----请选择-----</option>
+        <volist name='medialist' id='media'>
+        <option value="<{$key}>" <if condition="$data['source'] eq $key">selected="selected"</if>><{$media}></option>
+        </volist>
+        </select>
+        <else/>
+        <span class="mri"><{$medialist[$data['source']]}></span>
+        <input type="hidden" value="1" name="source" />
+        </if>
+        </td>
+    	<td height="60" align="left" colspan="3">
+        <span class="m30">顾客需求：</span>
+        <volist name='needs' id='need'>
+        <input type="checkbox" value="<{$key}>" id='need<{$key}>' name='needs[]' <if condition="$needinfor[$key] eq $key">checked=checked</if>/><label class="m15" for='need<{$key}>'><{$need}></label>
+        </volist>
+        </td>
+    </tr>
+    <tr bgcolor="#e6fafc">
+    	<td height="60" colspan="4" align="center"><font size="+1">数据详情</font></td>
+    </tr>
+    <tr bgcolor="#ffffff">
+     	<td align="right">所属鼠标手：
+        <if condition="$power eq 1 or $power eq 2">
+        <select class="w2_120 mri" name="askid" id="askid">
+        <option value="">----请选择----</option>
+        <volist name='askarr' id='ser'>
+        <option value="<{$key}>" <if condition="$data['askid'] eq $key">selected="selected"</if>><{$ser}></option>
+        </volist>
+        </select>
+        <else/>
+        <span class="mri"><{$dataarr[$data['askid']]}></span>
+        <input type="hidden" value="1" name="askid"/>
+        </if>
+        </td>
+    	<td height="60" align="right">状态：
+        <if condition="$power neq 1 and $power neq 2 and $data['state'] eq 1">
+        <select class="styleselect" name="state" id="state">
+        <option value="1">有效</option>
+        </select>
+        <else/>
+        <select class="styleselect" name="state" id="state">
+        <volist name='states' id='state'>
+        <option value="<{$key}>" <if condition="$data['state'] eq $key">selected="selected"</if>><{$state}></option>
+        </volist>
+        </select>
+        </if>
+        
+        <select class="styleselect <if condition='$data.state neq 1'>none</if>" name="valid" id="valid">
+        <volist name='valids' id='valid'>
+        <option value="<{$key}>" <if condition="$data['valid'] eq $key">selected="selected"</if>><{$valid}></option>
+        </volist>
+        </select>
+        </td>
+        <td align="right">下次回访：<input type="date" class="w120 mri"  value="<{$data.nexttime}>" name="nexttime" id="nexttime"/></td>
+       <td align="right">签单时间：<input type="date" class="w120 mri"  value="<{$data.suretime}>" name="suretime" id="suretime"/></td>
+    </tr>
+    <tr bgcolor="#ffffff">
+    	<td height="60" align="right">所属商户：<span class="mri"><{$cusarr[$data['customers']]}></span></td>
+        <td align="right">所属网销：<span class="mri"><{$dataarr[$data['saleid']]}></span></td>
+        <td align="right">到店日期：<input type="date" class="w120 mri"  value="<{$data.incustime}>" name="incustime" id="incustime"/></td>
+        <td align="right"></td>
+    </tr>
+    <tr bgcolor="#e6fafc">
+    	<td height="60" colspan="4" align="center"><font size="+1">跟进记录</font></td>
+    </tr>
+    <tr bgcolor="#ffffff">
+    	<td colspan="4" height="80">
+        	<p style="height:20px"></p>
+            <volist name='note' id='n'>
+            <p class="jilu<if condition='$n.type eq 1'>2</if>"><span><b><{$dataarr[$n['userid']]}></b>（<{$n.addtime}>）：</span><{$n.note}><if condition="$n.pic neq null"><a href="__PUBLIC__/Uploads/<{$n.pic}>" class="piclink" target="_blank">图片</a></if></p>
+            </volist>
+            <textarea class="textb90_2" name="note" id="note" placeholder="跟进记录"></textarea>
+            <p style="height:10px"></p>
+            <p class="m30"><input type="file" name="pic" id="pic" /></p>
+            <p style="height:10px"></p>
+        </td>
+    </tr>
+    <tr bgcolor="#ffffff">
+        <td colspan="4" align="center" height="60">
+        <volist name='param' id='cs'>
+        	<input type="hidden" value="<{$cs}>" name='<{$key}>' />
+        </volist>
+        	<input type="hidden" value="<{$data.id}>" name="id" /><input type="submit" value="提交" class="addbtn" /><a href="javascript:history.back()" class="editbtn m30" onclick="return confirm('确定返回上一页吗？')">返回</a>
+        </td>
+    </tr>
+</table>
+</form>
+</if>
+<div class="padding60"></div>
+</div>
+</body>
+</html>

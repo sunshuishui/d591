@@ -1,0 +1,668 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>客资管理</title>
+<load href="__PUBLIC__/js/jquery-1.11.0.min.js" />
+<load href="__PUBLIC__/css/datastyle.css" />
+<script>
+	function DateSize($date1,$date2){
+		$s= new Date($date1); 
+		$d= new Date($date2); 
+		if($s>$d){
+			return false;
+		}else{
+			return true;
+		}	
+	}
+	function checkD(){
+		$bmobile=$('#bmobile').val();
+		$gmobile=$('#gmobile').val();
+		$omobile=$('#omobile').val();
+		$emobile=$('#emobile').val();
+		if(!$bmobile && !$gmobile && !$omobile && !$emobile){
+			alert('请至少填写男女一方的手机号码！');	
+			return false;
+		}
+		if($bmobile!=''){
+			if(! /^1[345678]\d{9}$/.test($bmobile)){
+				 $("#bmobile").focus();
+				 alert('请输入正确的男方号码！');
+				 return false;
+			}
+		}
+		if($gmobile!=''){
+			if(! /^1[345678]\d{9}$/.test($gmobile)){
+				 $("#gmobile").focus();
+				 alert('请输入正确的女方号码！');
+				 return false;
+			}
+		}
+		if(isNaN($("input[name='src[]']").val())){
+			alert('请添加数据媒体！');
+			return false;	
+		}
+		if($('#serviceid').val()==0){
+			 alert('请选择客服！');
+			 return false;	
+		}
+		if($('#nexttime').val()){
+			$mydate=new Date();
+			$nowdate=new Date($mydate.toLocaleDateString());
+			if(!DateSize($nowdate,$('#nexttime').val())){
+				alert('待回访时间不能小于当前时间！');
+				return false;	
+			}
+		}
+		
+		$valid=$('#valid').val();
+		$state=$('#state').val();
+		if($state==4){
+			if($valid==2){
+				$iu=0;
+				$("input[name='incus[]']").each(function($i){
+					if($("input[name='incus[]']").eq($i).prop('checked')){
+						$iu++;
+						if(!$(".iu").eq($i).val()){
+							$iu=0;
+							return false;
+						}
+					}	
+				})
+				if($iu<=0){
+					alert('请选择邀约到店的门店和时间！');
+					return false;
+				}
+			}
+			if($valid==3){
+				if($('#salecustomer').val()==0){
+					alert('请选择签单门店！');
+					return false;		
+				}
+				if($('#sale').val()==0){
+					alert('请选择签单销售！');
+					return false;		
+				}
+				if($('#suretime').val()==''){
+					alert('请填写订单时间！');
+					return false;		
+				}
+			}	
+			if($valid==4){
+				if($('#othervenue').val()=='' && $('#otherhotel').val()==''){
+					alert('请填写已定其他的会馆或酒店！');
+					return false;		
+				}
+			}
+		}
+		return true;
+	}
+	function checklength(){
+		if($('.srclist').find('div').length>0){
+			$('.temptext').hide();	
+		}else{
+			if($('.m30d2').css('display')=='none'){
+				$('.temptext').show();
+			}else{
+				$('.temptext').hide();	
+			}
+		}
+		
+	}
+	$(function(){
+		checklength();
+		$(document).on("click",'.upmove',function(){
+			$index=$(this).parent().index();
+			$dom=$(this).parent();
+			$($dom).insertBefore($(this).parent().prev());
+		})
+		$(document).on("click",'.downmove',function(){
+			$index=$(this).parent().index();
+			$dom=$(this).parent();
+			$($dom).insertAfter($(this).parent().next());
+		})	
+		$(document).on("click",'.deldata',function(){
+			if(confirm('确定要删除此媒体吗？')){
+				$(this).parent().remove();	
+			}
+			checklength();
+		})
+		$('.deldata2').click(function(){
+			$(this).parent().hide();	
+			checklength();
+		})
+		$('.datajs').click(function(){
+			$('.m30d2').show();
+			checklength();
+		})
+		$('.suredata').click(function(){
+			$srctext=$('#srcval option:selected').text();
+			$srctime=$('#srctime').val();
+			$srcval=$('#srcval').val();
+			$srctime=$srctime.replace('T',' ');
+			if($srcval==0){
+				alert('请先选择媒体！');
+				return false;	
+			}
+			if($srctext==''){
+				alert('请先选择媒体！');
+				return false;	
+			}
+			if($srctime==''){
+				alert('请选择时间！');
+				return false;	
+			}
+			
+			$dom='<div class="m30 m30d"><p>'+$srctext+'</p><span>（'+$srctime+'）</span><input type="hidden" value="'+$srcval+'" name="src[]" /><input type="hidden" value="'+$srctime+'" name="srctime[]" /><button type="button" class="upmove"></button><button type="button" class="downmove"></button><button type="button" class="deldata"></button></div>';
+			$('.srclist').append($dom);
+			$('.m30d2').hide();
+			$('#srcval').val(0);
+			$('#srctime').val('');
+			checklength();
+		});
+		$('#state').change(function(){
+			if($(this).val()==4){
+				$('#valid').show();	
+			}else{
+				$('#valid').hide();		
+			}
+		})
+		$("input[name='incus[]']").click(function(){
+			if($(this).prop('checked')){
+				$(this).parent().find('.iu').show();	
+			}else{
+				$(this).parent().find('.iu').hide();	
+				//$(this).parent().find('.iu').val('');	
+			}
+		})
+	})
+	function AjaxReturn($this){
+		$name=$($this).attr('name');
+		$val=$($this).val();
+		$id=$('#id').val();
+		$isact=true;
+		if(!$val){		//判断是否填写联系方式
+			$isact=false;
+		}
+		if($name=='bmobile' || $name=='gmobile'){
+			if(! /^1[345678]\d{9}$/.test($val)){		//判断手机号格式是否正确
+				$isact=false;
+			}
+		}
+		if($isact){
+			$.post('__URL__/checkrepeat',{name:$name,val:$val,id:$id},function($msg){
+				if($msg['status']==1 || $msg['status']==2){
+					$($this).css('border','solid 1px #ff0000');
+					alert($msg['info']);
+				}else{
+					$($this).css('border','solid 1px #e8ecf3');
+				}
+			})
+		}
+	}
+	function opensend($id){
+		window.open ("__URL__/sendsale/id/"+$id, "newwindow", "height=470, width=625, top=300, left=600, toolbar=no, menubar=no, scrollbars=no, resizable=no,location=no, status=no")
+	}
+	function checktime(){
+		if($('#starttime').val()!='' && $('#endtime').val()==''){
+			alert('请选择结束日期');
+			return false;
+		}
+		if($('#endtime').val()!='' && $('#starttime').val()==''){
+			alert('请选择开始日期');
+			return false;
+		}
+		if(!DateSize($('#starttime').val(),$('#endtime').val())){
+			alert('结束日期不能小于开始日期！');
+			return false;	
+		}
+		return true;
+	}
+</script>
+
+</head>
+
+<body>
+<div class="mainAll">
+<if condition="$act eq 1">
+<table cellpadding="0" cellspacing="0" cellspacing="0" width="100%">
+
+	<tr <if condition="$map['nt'] neq null">class="none"</if>>
+        <td class="bb_table" height="70" colspan="9">
+        <form action="__URL__/index" method="post" onsubmit="return checktime();">
+        <select class="w3_120 m30" name="state" id="state">
+        	<option value="nodata">---是否有效---</option>
+            <volist name='states' id='state'>
+            <option value="<{$key}>" <if condition="$map['state'] eq $key and $map['state'] neq null">selected</if>><{$state}></option>
+            </volist>
+        </select>
+        <select class="styleselect <if condition='$map.valid eq null and $map.state neq 4'>none</if>" name="valid" id="valid">
+        	<option value="nodata">--状态--</option>
+            <volist name='valids' id='valid'>
+            <option value="<{$key}>" <if condition="$map['valid'] eq $key">selected</if>><{$valid}></option>
+            </volist>
+        </select>
+        <select class="w3_120" name="media">
+        	<option value="nodata">---来源渠道---</option>
+            <volist name='medialist' id='media'>
+            <option value="<{$key}>" <if condition="$map['media'] eq $key">selected</if>><{$media}></option>
+            </volist>
+        </select>
+        <select class="w3_120" name="sale">
+        	<option value="nodata">---签单销售---</option>
+            <volist name='sales' id='sale'>
+            <option value="<{$key}>" <if condition="$map['sale'] eq $key">selected</if>><{$sale}></option>
+            </volist>
+        </select>
+        <select class="w3_120" name="need">
+        	<option value="nodata">---会员需求---</option>
+            <volist name='needs' id='need'>
+            <option value="<{$key}>" <if condition="$map['need'] eq $key">selected</if>><{$need}></option>
+            </volist>
+        </select>
+        <input type="text" class="w120" value="<{$map['keyword']}>" placeholder="联系方式" name="keyword" />
+        <input class="w120" value="<{$map['starttime']}>" type="date" name="starttime" id="starttime"/>-&nbsp;&nbsp;&nbsp;&nbsp;<input class="w120" type="date" value="<{$map['endtime']}>" name="endtime" id="endtime"/><input type="submit" value="搜索" class=" addbtn" />
+        </form>
+        </td>
+    </tr>
+  
+    <tr class="bb_table">
+        <th height="50" class="bb_table" align="center" width="5%">ID</th>
+        <th class="bb_table" align="center" width="10%">姓名</th>
+        <th class="bb_table" align="center" width="16%">联系方式</th>
+        <th class="bb_table" align="center" width="12%"><if condition="$map['nt'] neq null">回访<else/>提交</if>时间</th>
+        <th class="bb_table" align="center" width="13%">状态</th>
+        <th class="bb_table" align="center" width="10%">是否进店</th>
+        <th class="bb_table" align="center" width="10%">来源</th>
+        <th class="bb_table" align="center" width="10%">所属客服</th>
+        <th class="bb_table" align="center" width="14%">操作</th>
+    </tr>
+    <volist name='data' id='vo' empty="$empty">
+    <tr class="bb_table" onmouseover="this.style.background='#e9f2ed'" onmouseout="this.style.background='#ffffff'">
+     	<td class="bb_table" height="50" align="center"><{$vo.id}></td>
+        <td class="bb_table" height="50" align="center"><{:Echodata($vo['bname'],$vo['bmobile'],$vo['gname'],$vo['gmobile'],1)}></td>
+        <td class="bb_table" align="center"><{:Echodata($vo['bname'],$vo['bmobile'],$vo['gname'],$vo['gmobile'],2)}></td>
+        <td class="bb_table" align="center"><if condition="$map['nt'] neq null"><{:Hz($vo['nexttime'])}><else/><{$vo.addtime}></if></td>
+        <td class="bb_table" align="center"><{:Status($vo['state'],$vo['valid'])}></td>
+        <td class="bb_table" align="center"><if condition="$vo['daoguan'] gt 0"><font color="#e8687f">是</font><else />否</if></td>
+        <td class="bb_table" align="center"><{$medialist[$vo['firstsrc']]}></td>
+        <td class="bb_table" align="center"><{$service[$vo['serviceid']]}></td>
+        <td class="bb_table" align="center">
+        	<php>$map['id']=$vo['id']</php>
+        	<a href="<{:U('Member/editmember',$map)}>" class="editbtn">编辑</a>
+            <a href="javascript:" onclick="opensend(<{$vo.id}>)" class="delbtn"><if condition="$vo['issend'] eq 1">已</if>发送</a>
+        </td>
+    </tr>
+    </volist>
+    <tr><td colspan="9" height="60" align="center" class="pageclass"><{$show}></td></tr>
+</table>
+<elseif condition="$act eq 2"/>
+<p style="height:20px"></p>
+<form action="__URL__/addmember" method="post" onsubmit="return checkD();">
+<table cellpadding="0" cellspacing="1" width="1000" align="center" bgcolor="#32c2cd">
+	<tr bgcolor="#e6fafc">
+    	<td height="60" colspan="4" align="center"><font size="+1">基础信息</font></td>
+    </tr>
+	<tr bgcolor="#ffffff">
+    	<td height="60" width="25%" align="right">姓名（男）：<input type="text" class="w120 mri" value="<{$data.bname}>" name="bname" id="bname" /></td>
+        <td width="25%" align="right">电话（男）：<input type="text" class="w120 mri" value="<{$data.bmobile}>" name="bmobile" id="bmobile" maxlength="11" placeholder="男方手机号" onblur="AjaxReturn(this)" /></td>
+        <td width="25%" align="right">姓名（女）：<input type="text" class="w120 mri" value="<{$data.gname}>" name="gname" id="gname" /></td>
+        <td width="25%" align="right">电话（女）：<input type="text" class="w120 mri" value="<{$data.gmobile}>" name="gmobile" id="gmobile" maxlength="11" placeholder="女方手机号" onblur="AjaxReturn(this)" /></td>
+    </tr>
+    <tr bgcolor="#ffffff">
+    	<td height="60" align="right">其他姓名1：<input type="text" class="w120 mri" value="<{$data.oname}>" name="oname" id="oname" /></td>
+        <td align="right">其他电话1：<input type="text" class="w120 mri"  value="<{$data.omobile}>" name="omobile" id="omobile" onblur="AjaxReturn(this)";/></td>
+        <td align="right">其他姓名2：<input type="text" class="w120 mri" value="<{$data.ename}>" name="ename" id="ename" /></td>
+        <td align="right">其他电话2：<input type="text" class="w120 mri" value="<{$data.emobile}>" onblur="AjaxReturn(this)"; name="emobile" id="emobile"/></td>
+    </tr>
+    <tr bgcolor="#ffffff">
+    	<td height="60" align="right">婚期：<input type="date" class="w120 mri" name="marrydate" id="marrydate" /></td>
+        <td align="right">
+        微信：<input type="text" class="w120 mri" value="<{$data.emobile}>" onblur="AjaxReturn(this)" name="wechat" id="wechat"/>
+        </td>
+        <td colspan="2" rowspan="2">
+          <table cellspacing="0" cellpadding="0" width="100%">
+          	<tr>
+            	<td height="120" width="50" align="right">
+                <span class="datajs"><img src="__PUBLIC__/images/addbutton.png" /></span>
+                </td>
+                <td>
+                
+                <div class="srclist">
+                
+            </div>
+             <p class="m30 temptext">点击左侧按钮添加媒体！</p>
+          <p class="m30 m30d2">
+          <select class="w120" id="srcval">
+          <option value="0">----请选择----</option>
+          <volist name='medialist' id='media'>
+          <option value="<{$key}>"><{$media}></option>
+          </volist>
+          </select><input type="datetime-local" value="<{$nowtime}>" id="srctime" class="w170"/><button type="button" class="suredata"></button><button type="button" class="deldata2" style="margin-left:15px"></button></p>
+                </td>
+            </tr>
+          </table>        
+         </td>
+        </tr>
+    <tr bgcolor="#ffffff">
+    	<td height="60" align="right">桌数：<input type="text" class="w120 mri"  value="<{$data.desk}>" name="desk" id="desk"/></td>
+        <td align="right">
+        QQ：<input type="text" class="w120 mri" value="<{$data.emobile}>" onblur="AjaxReturn(this)" name="qq" id="qq"/>
+        </td>
+        </tr>
+    <tr bgcolor="#ffffff">
+    	<td height="60" align="left" colspan="4">
+        <span class="m30">会员需求：</span>
+        <volist name='needs' id='need'>
+        <input type="checkbox" value="<{$key}>" id='need<{$key}>' name='needs[]'/><label class="m15" for='need<{$key}>'><{$need}></label>
+        </volist>
+        </td>
+    </tr>
+    <tr bgcolor="#ffffff">
+    	<td height="60" align="left" colspan="3">
+        <span class="m30">推荐门店：</span>
+        <volist name='customers' id='customer'>
+        <input type="checkbox" value="<{$key}>" id='customer<{$key}>' name='customers[]'/><label class="m15" for='customer<{$key}>'><{$customer}></label>
+        </volist>
+        </td>
+        <td align="right">所属客服：
+        <select class="w2_120 mri" name="serviceid" id="serviceid">
+        <option value="0">----请选择----</option>
+        <volist name='service' id='ser'>
+        <option value="<{$key}>"><{$ser}></option>
+        </volist>
+        </select>
+        </td>
+    </tr>
+    <tr bgcolor="#ffffff" style="display:none">
+     	<td align="right">所属客服：
+        </td>
+    	<td height="60" align="right">状态：
+        <select class="styleselect" name="state" id="state">
+        <volist name='states' id='state'>
+        <option value="<{$key}>"><{$state}></option>
+        </volist>
+        </select>
+        <select class="styleselect none" name="valid" id="valid">
+        <volist name='valids' id='valid'>
+        <option value="<{$key}>"><{$valid}></option>
+        </volist>
+        </select>
+        </td>
+        <td align="right">下次回访：<input type="date" class="w120 mri"  value="<{$data.nexttime}>" name="nexttime" id="nexttime"/></td>
+        <td align="left" rowspan="3">
+        <p class="m30" style="line-height:30px">到馆门店：</p>
+        <volist name='customers' id='customer'>
+        <p class="m30" style="line-height:30px">
+        <input type="checkbox" value="<{$key}>" id='cus<{$key}>' name='incus[]' />
+        <label for='cus<{$key}>' class="m15"><{$customer|str_replace='幸福码头','',###|str_replace='DreamHouse','',###|str_replace='旗舰','',###}></label>
+        <input type="date" class="w120 none iu" name='incusdate<{$key}>' />
+        </p>
+        </volist>
+        </td>
+    </tr>
+    <tr bgcolor="#ffffff" style="display:none">
+    	<td height="60" align="right">
+        签单门店：<select class="w2_120 mri" name="salecustomer" id='salecustomer'>
+        <option value="0">----未选择----</option>
+        <volist name='customers' id='customer'>
+        	<option value="<{$key}>" <if condition="$key eq $data['sale']">selected</if>><{$customer}></option>
+        </volist>
+        </select>
+        </td>
+        <td align="right">签单销售：<select class="w2_120 mri" name="sale" id='sale'>
+        <option value="0">----未选择----</option>
+        <volist name='sales' id='sale'>
+        <option value="<{$key}>"><{$sale}></option>
+        </volist>
+        </select></td>
+        <td align="right">签单时间：<input type="date" class="w120 mri"  value="<{$data.suretime}>" name="suretime" id="suretime"/></td>
+    </tr>
+    <tr bgcolor="#e6fafc">
+    	<td height="60" colspan="4" align="center"><font size="+1">跟进记录</font></td>
+    </tr>
+    <tr bgcolor="#ffffff">
+    	<td colspan="4" height="80">
+        	<p style="height:20px"></p>
+            <textarea class="textb90_2" name="note" placeholder="跟进记录"></textarea>
+            <p style="height:20px"></p>
+        </td>
+    </tr>
+    <tr bgcolor="#ffffff">
+        <td colspan="4" align="center" height="60">
+        	<input type="hidden" value="<{$data.id}>" name="id" /><input type="submit" value="提交" class="addbtn" /><a href="javascript:history.back()" class="editbtn m30" onclick="return confirm('确定返回上一页吗？')">返回</a>
+        </td>
+    </tr>
+</table>
+</form>
+<elseif condition="$act eq 3"/>
+<p style="height:20px"></p>
+<form action="__URL__/savemember" method="post" onsubmit="return checkD();">
+<table cellpadding="0" cellspacing="1" width="1000" align="center" bgcolor="#32c2cd">
+	<tr bgcolor="#e6fafc">
+    	<td height="60" colspan="4" align="center"><font size="+1">基础信息</font></td>
+    </tr>
+	<tr bgcolor="#ffffff">
+    	<td height="60" width="25%" align="right">姓名（男）：<input type="text" class="w120 mri" value="<{$data.bname}>" name="bname" id="bname" /></td>
+        <td width="25%" align="right">电话（男）：<if condition="$data.bmobile neq null"><span class="mri"><{$data.bmobile|sjiemi}></span><input type="hidden" value="<{$data.bmobile|sjiemi}>" name="bmobile" id="bmobile"/><else/><input type="text" class="w120 mri" value="" name="bmobile" id="bmobile" maxlength="11" placeholder="男方手机号" onblur="AjaxReturn(this)" /></if></td>
+        <td width="25%" align="right">姓名（女）：<input type="text" class="w120 mri" value="<{$data.gname}>" name="gname" id="gname" /></td>
+        <td width="25%" align="right">电话（女）：<if condition="$data.gmobile neq null"><span class="mri"><{$data.gmobile|sjiemi}></span><input type="hidden" value="<{$data.gmobile|sjiemi}>" name="gmobile" id="gmobile"/><else/><input type="text" class="w120 mri" value="" name="gmobile" id="gmobile" maxlength="11" placeholder="女方手机号" onblur="AjaxReturn(this)" /></if></td>
+    </tr>
+    <tr bgcolor="#ffffff">
+    	<td height="60" align="right">其他姓名1：<input type="text" class="w120 mri" value="<{$data.oname}>" name="oname" id="oname" /></td>
+        <td align="right">其他电话1：<if condition="$data.omobile neq null"><span class="mri"><{$data.omobile}></span><input type="hidden" value="<{$data.omobile}>" name="omobile" id="omobile"/><else/><input type="text" class="w120 mri" value="" name="omobile" id="omobile" maxlength="11" placeholder="其他电话1" onblur="AjaxReturn(this)" /></if></td>
+        <td align="right">其他姓名2：<input type="text" class="w120 mri" value="<{$data.ename}>" name="ename" id="ename" /></td>
+        <td align="right">其他电话2：<if condition="$data.emobile neq null"><span class="mri"><{$data.emobile}></span><input type="hidden" value="<{$data.emobile}>" name="emobile" id="emobile"/><else/><input type="text" class="w120 mri" value="" name="emobile" id="emobile" maxlength="11" placeholder="其他电话2" onblur="AjaxReturn(this)" /></if></td>
+    </tr>
+    <tr bgcolor="#ffffff">
+    	<td height="60" align="right">婚期：<input type="date" class="w120 mri" value="<{$data.marrydate}>" name="marrydate" id="marrydate" /></td>
+        <td align="right">
+        微信：<input type="text" class="w120 mri" value="<{$data.wechat}>" onblur="AjaxReturn(this)" name="wechat" id="wechat"/>
+        </td>
+        <td colspan="2" rowspan="2">
+          <table cellspacing="0" cellpadding="0" width="100%">
+          	<tr>
+            	<td height="120" width="50" align="right">
+                <span class="datajs"><img src="__PUBLIC__/images/addbutton.png" /></span>
+                </td>
+                <td>
+                <div class="srclist">
+                <volist name='src' id='srct'>
+                <div class="m30 m30d"><p><{$medialist[$srct]}></p><span>（<{$srctime[$key]}>）</span><input type="hidden" value="<{$srct}>" name="src[]" /><input type="hidden" value="<{$srctime[$key]}>" name="srctime[]" /><button type="button" class="upmove"></button><button type="button" class="downmove"></button><button type="button" class="deldata"></button></div>
+                </volist>
+            </div>
+             <p class="m30 temptext">点击左侧按钮添加媒体！<{$nowtime}></p>
+          <p class="m30 m30d2">
+          <select class="w120" id="srcval">
+          <option value="0">----请选择----</option>
+          <volist name='medialist' id='media'>
+          <option value="<{$key}>"><{$media}></option>
+          </volist>
+          </select><input type="datetime-local" id="srctime" value="<{$nowtime}>" class="w170"/><button type="button" class="suredata"></button><button type="button" class="deldata2" style="margin-left:15px"></button></p>
+                </td>
+            </tr>
+          </table>        
+         </td>
+        </tr>
+    <tr bgcolor="#ffffff">
+    	<td height="60" align="right">桌数：<input type="text" class="w120 mri"  value="<{$data.desk}>" name="desk" id="desk"/></td>
+        <td align="right">
+        QQ：<input type="text" class="w120 mri" value="<{$data.qq}>" onblur="AjaxReturn(this)" name="qq" id="qq"/>
+        </td>
+        </tr>
+    <tr bgcolor="#ffffff">
+    	<td height="60" align="left" colspan="4">
+        <span class="m30">会员需求：</span>
+        <volist name='needs' id='need'>
+        <input type="checkbox" value="<{$key}>" id='need<{$key}>' name='needs[]' <if condition="$needinfor[$key] eq $key">checked</if>/><label class="m15" for='need<{$key}>'><{$need}></label>
+        </volist>
+        </td>
+    </tr>
+    <tr bgcolor="#ffffff">
+    	<td height="60" align="left" colspan="3">
+        <span class="m30">推荐门店：</span>
+        <volist name='customers' id='customer'>
+        <input type="checkbox" value="<{$key}>" id='customer<{$key}>' name='customers[]' <if condition="$customerinfor[$key] eq $key">checked</if>/><label class="m15" for='customer<{$key}>'><{$customer}></label>
+        </volist>
+        </td>
+        <td align="right">所属客服：
+        <input type="hidden" value="<{$data['serviceid']}>" name='serviceid' />
+        <span class="mri"><{$service[$data['serviceid']]}></span>
+        </td>
+    </tr>
+    <tr bgcolor="#e6fafc" style="display:none">
+    	<td height="60" colspan="4" align="center"><font size="+1">数据详情</font></td>
+    </tr>
+    <tr bgcolor="#ffffff" style="display:none">
+     	<td align="right">所属客服：
+      
+        </td>
+    	<td height="60" align="right">数据状态：
+        <select class="styleselect" name="state" id="state">
+        <volist name='states' id='state'>
+        <option value="<{$key}>" <if condition="$key eq $data['state']">selected</if>><{$state}></option>
+        </volist>
+        </select>
+        <select class="styleselect <if condition='$data.valid eq 0'>none</if>" name="valid" id="valid">
+        <volist name='valids' id='valid'>
+        <option value="<{$key}>" <if condition="$key eq $data['valid']">selected</if>><{$valid}></option>
+        </volist>
+        </td>
+        <td align="right">下次回访：<input type="date" class="w120 mri"  value="<{$data.nexttime}>" name="nexttime" id="nexttime"/></td>
+        <td align="left" rowspan="3">
+       	<p class="m30" style="line-height:30px">到馆门店：</p>
+        <volist name='customers' id='customer'>
+        <p class="m30" style="line-height:30px">
+        <input type="checkbox" value="<{$key}>" id='cus<{$key}>' name='incus[]' <if condition="$incus[$key] neq null">checked</if> />
+        <label for='cus<{$key}>' class="m15"><{$customer|str_replace='幸福码头','',###|str_replace='DreamHouse','',###|str_replace='旗舰','',###}></label>
+        <input type="date" class="w120 <if condition='$incus[$key] eq null'>none</if> iu" value="<{$incus[$key]}>" name='incusdate<{$key}>' />
+        </p>
+        </volist>
+        </td>
+    </tr>
+    
+    <tr bgcolor="#ffffff" style="display:none">
+    	<td height="60" align="right">
+        签单门店：<select class="w2_120 mri" name="salecustomer" id='salecustomer'>
+        <option value="0">----未选择----</option>
+        <volist name='customers' id='customer'>
+        	<option value="<{$key}>" <if condition="$key eq $data['salecustomer']">selected</if>><{$customer}></option>
+        </volist>
+        </select>
+        </td>
+        <td align="right">签单销售：<select class="w2_120 mri" name="sale" id='sale'>
+        <option value="0">----未选择----</option>
+        <volist name='sales' id='sale'>
+        <option value="<{$key}>" <if condition="$key eq $data['sale']">selected</if>><{$sale}></option>
+        </volist>
+        </select></td>
+        
+        <td align="right">签单时间：<input type="date" class="w120 mri"  value="<{$data.suretime}>" name="suretime" id="suretime"/></td>
+    </tr>
+    <tr bgcolor="#ffffff" style="display:none">
+    	<td height="60" align="right">签单金额：<input type="text" class="w120 mri"  value="<{$data.orderprice}>" name="orderprice" id="orderprice"/></td>
+        <td align="right">
+        签单桌数：<input type="text" class="w120 mri" value="<{$data.orderdesk}>" name="orderdesk" id="orderdesk"/>
+        </td>
+        <td height="60" align="right">订其他会馆：<input type="text" class="w120 mri"  value="<{$data.othervenue}>" name="othervenue" id="othervenue"/></td>
+    </tr>
+    <tr bgcolor="#ffffff" style="display:none">
+        <td align="right">
+        订其他酒店：<input type="text" class="w120 mri" value="<{$data.otherhotel}>" name="otherhotel" id="otherhotel"/>
+        </td>
+        <td height="60" align="left" colspan="3">
+        <table cellpadding="0" cellspacing="0">
+        	<tr>
+            	<td width="93" align="right">推荐销售：</td>
+                <td>
+                 <volist name='sendrecord' id='sendr'>
+                  <p style="line-height:23px;"><if condition="$service[$sendr['serviceid']] eq null">管理员<else/><{$service[$sendr['serviceid']]}></if>（<{$sendr.sendtime}>）&nbsp;—&nbsp;<{$sendr.sendsale}></p>
+                  </volist>
+                </td>
+            </tr>
+        </table>
+       
+        </td>
+    </tr>
+    <tr bgcolor="#e6fafc">
+    	<td height="60" colspan="4" align="center"><font size="+1">跟进记录</font></td>
+    </tr>
+    <tr bgcolor="#ffffff">
+    	<td colspan="4" height="80">
+        	<p style="height:20px"></p>
+            <volist name='note' id='n'>
+            <p class="jilu<if condition='$n.type eq 1'>2</if>"><span><if condition="$service[$n['serviceid']] eq null">管理员<else/><{$service[$n['serviceid']]}></if>（<{$n.addtime}>）：</span><{$n.note}></p>
+            </volist>
+            <textarea class="textb90_2" name="note" placeholder="跟进记录"></textarea>
+            <p style="height:20px"></p>
+        </td>
+    </tr>
+    <tr bgcolor="#ffffff">
+        <td colspan="4" align="center" height="60">
+        <volist name='param' id='cs'>
+        	<input type="hidden" value="<{$cs}>" name='<{$key}>' />
+        </volist>
+        	<input type="hidden" value="<{$data.id}>" name="id" id='id'/><input type="submit" value="提交" class="addbtn" /><a href="javascript:history.back()" class="editbtn m30" onclick="return confirm('确定返回上一页吗？')">返回</a>
+        </td>
+    </tr>
+</table>
+</form>
+<elseif condition="$act eq 4"/>
+<form action="__URL__/addsend" method="post">
+<table cellpadding="0" cellspacing="1" cellspacing="0" width="100%">
+    <tr>
+        <td colspan="3" height="55" class="bb_table" align="center"><span class="font14 bold500">发给销售</span></td>
+    </tr>
+    <tr>
+        <td width="160" height="50" class="bb_table" align="left"><span class="bold500 m30">客人姓名</span><span class="m30"><{:Echodata($data['bname'],$data['bmobile'],$data['gname'],$data['gmobile'],1)}></span></td>
+        <td width="160" class="bb_table"><span class="bold500 m30">手机</span><span class="m30"><{:Echodata($data['bname'],$data['bmobile'],$data['gname'],$data['gmobile'],2)}></span></td>
+        <td width="160" class="bb_table" align="center"><span class="bold500">状态</span><span class="m30"><{:Status($data['state'],$data['valid'])}></span></td>
+    </tr>
+    <tr>
+        <td width="160" height="50" class="bb_table" colspan="3">
+        <span class="bold500 m30">推荐门店</span>
+        <volist name='customerinfor' id='customer'>
+        <span class="m30"><{$customers[$customer]}></span>
+        </volist>
+        </td>
+    </tr>
+    <if condition="count($sendrecord) gt 0">
+    <tr>
+        <td class="bb_table" colspan="3">
+        <table cellpadding="0" cellspacing="0">
+        	<tr>
+            	<td width="80" align="right" height="50"><span class="bold500">发送记录</span></td>
+                <td>
+                <volist name='sendrecord' id='sendr'>
+                <p style="line-height:30px; margin-left:30px"><if condition="$service[$sendr['serviceid']] eq null">管理员<else/><{$service[$sendr['serviceid']]}></if>（<{$sendr.sendtime}>）：<{$sendr.sendsale}></p>
+                </volist>
+                </td>
+            </tr>
+        </table>
+        </td>
+    </tr>
+    </if>
+    <tr>
+        <td width="160" height="60" class="bb_table" colspan="3" style="padding-left:28px; padding-top:15px">
+        <volist name='sales' id='sale'>
+        <p class="salelist"><input type="checkbox" value="<{$key}>" id="sale<{$key}>" name="sale[]"/><label for="sale<{$key}>"><{$sale}></label></p>
+        </volist>
+        </td>
+    </tr>
+    <tr>
+        <td height="85" class="bb_table" colspan="3">
+        	<textarea name="remark" class="textb90_3" placeholder="限制字数100字"></textarea>
+        </td>
+    </tr>
+    <tr>
+        <td class="bb_table" colspan="3" height="60" align="center">
+       		<input type="hidden" value="<{$data.id}>" name="id" id='id'/><input type="submit" value="发送" class="addbtn" />
+        </td>
+    </tr>
+</table>
+</form>
+</if>
+<div class="padding60"></div>
+</div>
+</body>
+</html>

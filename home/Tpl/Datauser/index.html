@@ -1,0 +1,233 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>用户管理</title>
+<load href="__PUBLIC__/js/jquery-1.11.0.min.js" />
+<load href="__PUBLIC__/css/datastyle.css" />
+<script>
+	function checkD(){
+		if($('#username').val()==''){
+			alert('用户名不能为空');	
+			$('#username').focus();
+			return false;
+		}
+		if($('#password').val()==''){
+			alert('密码不能为空');	
+			$('#password').focus();
+			return false;
+		}
+		return true;
+	}
+	function checkD2(){
+		if($('#username').val()==''){
+			alert('用户名不能为空');	
+			$('#username').focus();
+			return false;
+		}
+		return true;
+	}
+	function openedit($id){
+		window.open ("__URL__/ticket/id/"+$id, "newwindow", "height=480, width=480, top=300, left=600, toolbar=no, menubar=no, scrollbars=no, resizable=no,location=no, status=no")
+	}
+</script>
+</head>
+
+<body>
+<div class="mainAll">
+<if condition="$act eq 1">
+<div class="addmedia">
+   <a href="__URL__/adddata/power/<{$power}>" class="m30 addbtn">添加</a>
+</div>
+<table cellpadding="0" cellspacing="0" cellspacing="0" width="100%">
+    <tr class="bb_table">
+        <th height="50" class="bb_table" align="center" width="10%">ID</th>
+        <th class="bb_table" align="center" width="15%">用户名</th>
+        <th class="bb_table" align="center" width="15%">允许登录</th>
+        <th class="bb_table" align="center" width="10%">是否绑定</th>
+        <th class="bb_table" align="center" width="15%">角色</th>
+        <th class="bb_table" align="center" width="15%">添加日期</th>
+        <th class="bb_table" align="center" width="20%">操作</th>
+    </tr>
+    <volist name='data' id='user'>
+    <tr class="bb_table" onmouseover="this.style.background='#e9f2ed'" onmouseout="this.style.background='#ffffff'">
+        <td class="bb_table" height="50" align="center"><{$user.id}></td>
+        <td class="bb_table" align="center"><{$user.username}></td>
+        <td class="bb_table" align="center"><if condition="$user['allowlogin'] eq 1">允许<else/>否</if></td>
+        <td class="bb_table" align="center"><if condition="$user['openid'] neq null">已绑定<else/>未绑定</if></td>
+        <td class="bb_table" align="center"><{$powerlist[$user['power']]}><if condition="$user['powerk'] eq 1">经理</if></td>
+        <td class="bb_table" align="center"><{$user.addtime}></td>
+        <td class="bb_table" align="center">
+            <a href="__URL__/editdata/id/<{$user.id}>" class="editbtn">编辑</a>
+            <if condition="$user['openid'] neq null">
+            <a href="__URL__/canticket/id/<{$user.id}>" class="viewbtn" onclick="return confirm('确定解除此微信绑定吗？')">解绑</a>
+            <else/>
+            <a href="javascript:" onclick="openedit(<{$user.id}>);" class="viewbtn" style="background-color:#2dcb73">绑定微信</a>
+            </if>
+            <a href="__URL__/deluser/id/<{$user.id}>" class="delbtn" onclick="return confirm('确定要删除吗？')">删除</a>
+        </td>
+    </tr>
+    </volist>
+</table>
+<elseif condition="$act eq 2" />
+<form action="__URL__/adduser" method="post" onsubmit="return checkD();">
+	<table cellpadding="0" cellspacing="1" cellspacing="0" width="100%">
+    	<tr>
+        	<td colspan="2" height="55" class="bb_table" align="center"><span class="font14">添加</span><{$powerlist[$power]}></td>
+        </tr>
+        <tr>
+        	<td width="180" height="60" class="bb_table" align="right"><span class="bold500">用户名</span></td>
+            <td class="bb_table"><input type="text" value="" class="wb90" placeholder="姓名" name="username" id="username" maxlength="20"/></td>
+        </tr>
+        <tr>
+        	<td width="180" height="60" class="bb_table" align="right"><span class="bold500">密码</span></td>
+            <td class="bb_table"><input type="password" value="" class="wb90" placeholder="******" name="password" id="salepwd" maxlength="15"/></td>
+        </tr>
+        <tr>
+        	<td width="180" height="60" class="bb_table" align="right"><span class="bold500">角色</span></td>
+            <td class="bb_table"><span class="m30"><{$powerlist[$power]}></span><span class="m30"><input type="hidden" value="<{$power}>" name="power"/>
+            <if condition="$power eq 3">
+            <select name="powerk" class="w120">
+            	<option>婚宴客服</option>
+                <option value="1">客服经理</option>
+                <option value="2">数据录入</option>
+            </select>
+            <else/>
+            <input type="checkbox" name='powerk' value="1" />设为经理
+            </if>
+            </span>
+            </td>
+        </tr>
+        <tr>
+        	<td width="180" height="60" class="bb_table" align="right"><span class="bold500">允许登录</span></td>
+            <td class="bb_table">
+            <span class="m30"><select class="w120" name="allowlogin"><option value="1">允许</option><option value="0">不允许</option></select></span>
+            </td>
+        </tr>
+        <if condition="$power neq 2">
+        <tr>
+        	<td width="180" height="80" class="bb_table" align="right"><span class="bold500">管理媒体</span></td>
+            <td class="bb_table">
+            	<div class="m30 medialist">
+                	<ul>
+                    	<volist name='media' id='mlist'>
+                    	<li><input type="checkbox" name="media[]" value="<{$mlist.id}>" id="media<{$i}>" /><label for="media<{$i}>"><{$mlist.medianame}></label></li>
+                        </volist>
+                    </ul>
+                </div>
+            </td>
+        </tr>
+        </if>
+        <tr>
+        	<td width="180" height="60" class="bb_table"></td>
+            <td class="bb_table"><input type="submit" value="提交" class="addbtn m30"/><a href="javascript:history.back()" class="editbtn m30">返回</a></td>
+        </tr>
+    </table>
+</form>
+<elseif condition="$act eq 3" />
+
+<form action="__URL__/edituser" method="post" onsubmit="return checkD2();">
+	<table cellpadding="0" cellspacing="1" cellspacing="0" width="100%">
+    	<tr>
+        	<td colspan="2" height="55" class="bb_table" align="center"><span class="font14">编辑</span><{$powerlist[$power]}></td>
+        </tr>
+        <tr>
+        	<td width="180" height="60" class="bb_table" align="right"><span class="bold500">用户名</span></td>
+            <td class="bb_table"><input type="text" value="<{$user.username}>" class="wb90" placeholder="姓名" name="username" id="username" maxlength="20"/><input type="hidden" value="<{$user.id}>" name="id" /></td>
+        </tr>
+        <tr>
+        	<td width="180" height="60" class="bb_table" align="right"><span class="bold500">密码</span></td>
+            <td class="bb_table"><input type="password" value="" class="wb90" placeholder="******" name="password" id="salepwd" maxlength="15"/></td>
+        </tr>
+        <tr>
+        	<td width="180" height="60" class="bb_table" align="right"><span class="bold500">角色</span></td>
+            <td class="bb_table"><span class="m30"><{$powerlist[$user['power']]}></span><span class="m30"><input type="hidden" value="<{$user.power}>" name="power" />
+            <eq name="user.power" value="3">
+            <select name="powerk" class="w120">
+            	<option>婚宴客服</option>
+                <option value="1" <if condition="$user.powerk eq 1">selected="selected"</if>>客服经理</option>
+                <option value="2" <if condition="$user.powerk eq 2">selected="selected"</if>>数据录入</option>
+            </select>
+            <else/>
+            <input type="checkbox" name='powerk' value="1" <if condition="$user.powerk eq 1">checked</if>/>设为经理
+            </eq>
+            </span>
+            </td>
+        </tr>
+        <tr>
+        	<td width="180" height="60" class="bb_table" align="right"><span class="bold500">允许登录</span></td>
+            <td class="bb_table">
+            <span class="m30"><select class="w120" name="allowlogin"><option value="1" <if condition="$user.allowlogin eq 1">selected="selected"</if>>允许</option><option value="0" <if condition="$user.allowlogin eq 0">selected="selected"</if>>不允许</option></select></span>
+            </td>
+        </tr>
+        <if condition="$user.power neq 2">
+        <tr>
+        	<td width="180" height="80" class="bb_table" align="right"><span class="bold500">管理媒体</span></td>
+            <td class="bb_table">
+            	<div class="m30 medialist">
+                	<ul>
+                    	<volist name='media' id='mlist'>
+                    	<li><input type="checkbox" name="media[]" value="<{$mlist.id}>" id="media<{$i}>" <if condition="$medialist[$mlist['id']] neq null">checked</if> /><label for="media<{$i}>"><{$mlist.medianame}></label></li>
+                        </volist>
+                    </ul>
+                </div>
+            </td>
+        </tr>
+        </if>
+        <tr>
+        	<td width="180" height="60" class="bb_table"></td>
+            <td class="bb_table"><input type="submit" value="提交" class="addbtn m30"/><a href="javascript:history.back()" class="editbtn m30">返回</a></td>
+        </tr>
+    </table>
+</form>
+
+<elseif condition="$act eq 4" />
+<script>
+$(function(){
+	$id=<{$user['id']}>;
+	$i=0;
+	$exec=setInterval(function(){
+		$.post('__URL__/isband',{id:$id},function($back){
+			$i++;
+			if($i<15){
+				if($back['status']==1){
+					clearInterval($exec);	
+					alert('绑定成功！');
+					window.opener.location.reload();
+					window.close();
+				}
+			}else{
+				clearInterval($exec);
+				window.opener.location.reload();
+				window.close();
+			}
+		})	
+	},2000);
+})
+</script>
+<table cellpadding="0" cellspacing="1" cellspacing="0" width="100%">
+    <tr>
+        <td colspan="2" height="55" class="bb_table" align="center"><span class="font14">绑定微信</span></td>
+    </tr>
+    <tr>
+        <td width="180" height="60" class="bb_table" align="right"><span class="bold500">用户名</span></td>
+        <td class="bb_table"><span class="m30"><{$user.username}></span></td>
+    </tr>
+    <tr>
+        <td width="180" height="60" class="bb_table" align="right"><span class="bold500">角色</span></td>
+        <td class="bb_table"><span class="m30"><{$powerlist[$user['power']]}><if condition="$user['powerk'] eq 1">经理</if></span></td>
+    </tr>
+    <tr>
+        <td width="180" height="180" class="bb_table" align="right"><span class="bold500">二维码</span></td>
+        <td class="bb_table">
+        <p class="m30">
+       		<img src="https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=<{$ticket}>" width="150" />
+        </p>
+        </td>
+    </tr>
+</table>
+</if>
+<div class="padding60"></div>
+</div>
+</body>
+</html>

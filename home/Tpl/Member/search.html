@@ -1,0 +1,61 @@
+<form action="__URL__/index" method="post" onsubmit="return checktime();">
+        <select class="w3_120 m30" name="state" id="state">
+        	<option value="nodata">---是否有效---</option>
+            <volist name='states' id='state'>
+            <option value="<{$key}>" <if condition="$map['state'] eq $key and $map['state'] neq null">selected</if>><{$state}></option>
+            </volist>
+        </select>
+        <select class="styleselect <if condition='$map.valid eq null and $map.state neq 1'>none</if>" name="valid" id="valid">
+        	<option value="nodata">--状态--</option>
+            <volist name='valids' id='valid'>
+            <option value="<{$key}>" <if condition="$map['valid'] eq $key">selected</if>><{$valid}></option>
+            </volist>
+        </select>
+        <if condition="$power neq 5 and $power neq 4 and $power neq 3">
+        <select class="w3_120" name="source">
+        	<option value="nodata">---来源渠道---</option>
+            <volist name='medialist' id='media'>
+            <option value="<{$key}>" <if condition="$map['source'] eq $key">selected</if>><{$media}></option>
+            </volist>
+        </select>
+        </if>
+        <if condition="$power neq 4 and $power neq 5 and $power neq 3">
+        <select class="w3_120" name="customers">
+        	<option value="nodata">---商户---</option>
+            <volist name='cusarr' id='cus'>
+            <option value="<{$key}>" <if condition="$map['customers'] eq $key">selected</if>><{$cus}></option>
+            </volist>
+        </select>
+        </if>
+        <if condition="$power neq 4 and $power neq 5 and  $power neq 3">
+        <select class="w3_120" name="askid">
+        	<option value="nodata">---鼠标手---</option>
+            <volist name='askarr' id='ask'>
+            <option value="<{$key}>" <if condition="$map['askid'] eq $key">selected</if>><{$ask}></option>
+            </volist>
+        </select>
+        </if>
+        <if condition="$power neq 5 and $power neq 3">
+        <php>
+        if($power==4){
+        	$sale_data_arr=$salecusarr;
+        }else{
+        	$sale_data_arr=$salearr;
+        }
+        </php>
+        <select class="w3_120" name="saleid">
+        	<option value="nodata">---网销---</option>
+            <volist name='sale_data_arr' id='sale'>
+            <option value="<{$key}>" <if condition="$map['saleid'] eq $key">selected</if>><{$sale}></option>
+            </volist>
+        </select>
+        </if>
+        <select class="w3_120" name="need">
+        	<option value="nodata">---会员需求---</option>
+            <volist name='needs' id='need'>
+            <option value="<{$key}>" <if condition="$map['need'] eq $key">selected</if>><{$need}></option>
+            </volist>
+        </select>
+        <input type="text" class="w120" value="<{$map['keyword']}>" placeholder="联系方式" name="keyword" />
+        <input class="w120" value="<{$map['starttime']}>" type="date" name="starttime" id="starttime"/>-&nbsp;&nbsp;&nbsp;&nbsp;<input class="w120" type="date" value="<{$map['endtime']}>" name="endtime" id="endtime"/><input type="submit" value="搜索" class=" addbtn" />
+</form>
